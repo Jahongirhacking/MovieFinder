@@ -1,4 +1,6 @@
 import React from 'react';
+import Table from './Table';
+import Search from './Search';
 
 // https://hn.algolia.com/api/v1/search?query=redux
 
@@ -17,9 +19,27 @@ class App extends React.Component {
         }
         this.fetchingProcess = this.fetchingProcess.bind(this);
         this.assigningProcess = this.assigningProcess.bind(this);
+        this.onChange = this.onChange.bind(this);
+        this.onDismiss = this.onDismiss.bind(this);
+        this.onSubmit = this.onSubmit.bind(this);
     } 
 
+    onChange(e) {
+        this.setState({searched: e.target.value});
+    }
+
+    onDismiss(id) {
+        const updatedList = this.state.list.filter(el => el.objectID !== id);
+        this.setState({list: updatedList});
+    }
+
+    onSubmit(event) {
+        this.fetchingProcess(this.state.searched);
+        event.preventDefault();
+    }
+
     assigningProcess(result) {
+        console.log(result.hits);
         this.setState({list: result.hits});
     }
 
@@ -36,18 +56,14 @@ class App extends React.Component {
     }
 
     render() {
+        if(!this.state.list) return (<i style={{fontSize: "100px", textAlign: "center"}} className="fas fa-spinner fa-pulse"></i>); 
         return (
             <>
-                <h1>Hello World!!!</h1>
-                {this.state.list 
-                    ? <div>
-                        {
-                            this.state.list.map(
-                                (el,key) => <p key={key}>{el.title}</p>
-                            )
-                        }
-                    </div> 
-                    : "Empty"}
+                <Search searched={this.state.searched} onChange={this.onChange} onSubmit={this.onSubmit}>Search</Search>
+                <Table 
+                    list={this.state.list} 
+                    onDismiss={this.onDismiss} 
+                />
             </>
         )
     }
